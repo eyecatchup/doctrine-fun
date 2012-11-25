@@ -58,69 +58,55 @@ class FunRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->entity = new stdClass();
         $metadata = new ClassMetadata('stdClass');
         $metadata->fieldMappings = array('property' => 'property');
+        $metadata->identifier = array('id');
         $this->repository = new EntityRepository($this->em, $metadata);
     }
 
     public function testFind_EntityFound()
     {
-        $this->em
-            ->expects($this->once())
-            ->method('find')
-            ->with('stdClass', 123, LockMode::NONE, null)
-            ->will($this->returnValue($this->entity));
-
+        $this->expectBasicLoad($this->entity, 123);
         $this->assertSomeOption($this->repository->find(123));
     }
 
     public function testFind_NoEntityFound()
     {
-        $this->em
-            ->expects($this->once())
-            ->method('find')
-            ->with('stdClass', 123, LockMode::NONE, null);
-
+        $this->expectBasicLoad(null, 123);
         $this->assertNoneOption($this->repository->find(123));
     }
 
     public function testFindOne_EntityFound()
     {
         $this->expectPersisterLoad($this->entity, array('property' => 'value'));
-
         $this->assertSomeOption($this->repository->findOneBy(array('property' => 'value')));
     }
 
     public function testFindOne_NoEntityFound()
     {
         $this->expectPersisterLoad(null, array('property' => 'value'));
-
         $this->assertNoneOption($this->repository->findOneBy(array('property' => 'value')));
     }
 
     public function testFindOne_OrderBy_EntityFound()
     {
         $this->expectPersisterLoad($this->entity, array('property' => 'value'), array('id' => 'DESC'));
-
         $this->assertSomeOption($this->repository->findOneBy(array('property' => 'value'), array('id' => 'DESC')));
     }
 
     public function testFindOne_OrderBy_NoEntityFound()
     {
         $this->expectPersisterLoad(null, array('property' => 'value'), array('id' => 'DESC'));
-
         $this->assertNoneOption($this->repository->findOneBy(array('property' => 'value'), array('id' => 'DESC')));
     }
 
     public function testMagicFinder_EntityFound()
     {
         $this->expectPersisterLoad($this->entity, array('property' => 'value'));
-
         $this->assertSomeOption($this->repository->findOneByProperty('value'));
     }
 
     public function testMagicFinder_NoEntityFound()
     {
         $this->expectPersisterLoad(null, array('property' => 'value'));
-
         $this->assertNoneOption($this->repository->findOneByProperty('value'));
     }
 
@@ -155,5 +141,22 @@ class FunRepositoryTest extends \PHPUnit_Framework_TestCase
 
         call_user_func_array(array($stub, 'with'), $arguments);
         $stub->will($this->returnValue($entity));
+    }
+
+    protected function expectBasicLoad($entity, $id, $lockMode = LockMode::NONE, $lockVersion = null)
+    {
+        if (Version::compare('2.2.0') === -1) {
+            $this->em
+                ->expects($this->once())
+                ->method('find')
+                ->with(get_class($this->entity), $id, $lockMode, $lockVersion)
+                ->will($this->returnValue($entity));
+        } else {
+            $this->persister
+                ->expects($this->once())
+                ->method('load')
+                ->with(array('id' => $id))
+                ->will($this->returnValue($entity));
+        }
     }
 }
