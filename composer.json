@@ -1,0 +1,17 @@
+{
+    "name": "lstrojny/doctrine-fun-repository",
+    "description": "",
+    "require": {
+        "phpoption/phpoption": "dev-master",
+        "doctrine/orm": "dev-master"
+    },
+    "authors": [
+        {
+            "name": "Lars Strojny",
+            "email": "lars@strojny.net"
+        }
+    ],
+    "autoload": {
+        "psr-0": {"Doctrine\\Fun": "src"}
+    }
+}
