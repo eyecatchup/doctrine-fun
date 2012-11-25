@@ -1,6 +1,6 @@
 {
-    "name": "lstrojny/doctrine-fun-repository",
-    "description": "",
+    "name": "lstrojny/doctrine-fun",
+    "description": "Bring fun(ctional APIs) into Doctrine by integrating PhpOption with Doctrine",
     "require": {
         "phpoption/phpoption": "dev-master",
         "doctrine/orm": "dev-master"
