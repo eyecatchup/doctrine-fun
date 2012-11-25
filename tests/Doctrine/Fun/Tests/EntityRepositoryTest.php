@@ -4,6 +4,7 @@ namespace Doctrine\Fun\Tests;
 use Doctrine\Fun\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\DBAL\LockMode;
+use Doctrine\ORM\Version;
 use stdClass;
 
 class FunRepositoryTest extends \PHPUnit_Framework_TestCase
@@ -83,63 +84,42 @@ class FunRepositoryTest extends \PHPUnit_Framework_TestCase
 
     public function testFindOne_EntityFound()
     {
-        $this->persister
-            ->expects($this->once())
-            ->method('load')
-            ->with(array('property' => 'value'), null, null, array(), 0, 1, null)
-            ->will($this->returnValue($this->entity));
+        $this->expectPersisterLoad($this->entity, array('property' => 'value'));
 
         $this->assertSomeOption($this->repository->findOneBy(array('property' => 'value')));
     }
 
     public function testFindOne_NoEntityFound()
     {
-        $this->persister
-            ->expects($this->once())
-            ->method('load')
-            ->with(array('property' => 'value'), null, null, array(), 0, 1, null);
+        $this->expectPersisterLoad(null, array('property' => 'value'));
 
         $this->assertNoneOption($this->repository->findOneBy(array('property' => 'value')));
     }
 
     public function testFindOne_OrderBy_EntityFound()
     {
-        $this->persister
-            ->expects($this->once())
-            ->method('load')
-            ->with(array('property' => 'value'), null, null, array(), 0, 1, array('id' => 'DESC'))
-            ->will($this->returnValue($this->entity));
+        $this->expectPersisterLoad($this->entity, array('property' => 'value'), array('id' => 'DESC'));
 
         $this->assertSomeOption($this->repository->findOneBy(array('property' => 'value'), array('id' => 'DESC')));
     }
 
     public function testFindOne_OrderBy_NoEntityFound()
     {
-        $this->persister
-            ->expects($this->once())
-            ->method('load')
-            ->with(array('property' => 'value'), null, null, array(), 0, 1, array('id' => 'DESC'));
+        $this->expectPersisterLoad(null, array('property' => 'value'), array('id' => 'DESC'));
 
         $this->assertNoneOption($this->repository->findOneBy(array('property' => 'value'), array('id' => 'DESC')));
     }
 
     public function testMagicFinder_EntityFound()
     {
-        $this->persister
-            ->expects($this->once())
-            ->method('load')
-            ->with(array('property' => 'value'), null, null, array(), 0, 1, null)
-            ->will($this->returnValue($this->entity));
+        $this->expectPersisterLoad($this->entity, array('property' => 'value'));
 
         $this->assertSomeOption($this->repository->findOneByProperty('value'));
     }
 
     public function testMagicFinder_NoEntityFound()
     {
-        $this->persister
-            ->expects($this->once())
-            ->method('load')
-            ->with(array('property' => 'value'), null, null, array(), 0, 1, null);
+        $this->expectPersisterLoad(null, array('property' => 'value'));
 
         $this->assertNoneOption($this->repository->findOneByProperty('value'));
     }
@@ -156,5 +136,24 @@ class FunRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($option->isDefined());
 
         $this->assertSame($this->entity, $option->get());
+    }
+
+    protected function expectPersisterLoad($entity, array $criteria, array $orderBy = null)
+    {
+        if ($orderBy !== null && Version::compare('2.4.0') === 1) {
+            $this->markTestSkipped('EntityRepository::findOneBy(..., $orderBy) only supported in Doctrine >= 2.4.0');
+        }
+
+        $stub = $this->persister
+            ->expects($this->once())
+            ->method('load');
+
+        $arguments = array($criteria, null, null, array(), 0, 1);
+        if (Version::compare('2.4.0') === -1) {
+            $arguments[] = $orderBy;
+        }
+
+        call_user_func_array(array($stub, 'with'), $arguments);
+        $stub->will($this->returnValue($entity));
     }
 }
