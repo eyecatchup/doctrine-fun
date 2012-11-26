@@ -3,7 +3,7 @@
     "description": "Bring fun(ctional APIs) into Doctrine by integrating PhpOption with Doctrine",
     "require": {
         "phpoption/phpoption": "dev-master",
-        "doctrine/orm": "dev-master"
+        "doctrine/orm": ">=2.3"
     },
     "authors": [
         {
