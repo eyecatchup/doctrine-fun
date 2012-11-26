@@ -12,6 +12,10 @@
         }
     ],
     "autoload": {
-        "psr-0": {"Doctrine\\Fun": "src"}
-    }
+        "psr-0": {
+            "Doctrine\\Fun": "src",
+            "Doctrine\\ORM\\EntityManagerDecorator": "src"
+        }
+    },
+    "minimum-stability": "dev"
 }
