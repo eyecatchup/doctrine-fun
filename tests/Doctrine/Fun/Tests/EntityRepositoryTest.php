@@ -126,7 +126,7 @@ class FunRepositoryTest extends \PHPUnit_Framework_TestCase
 
     protected function expectPersisterLoad($entity, array $criteria, array $orderBy = null)
     {
-        if ($orderBy !== null && Version::compare('2.4.0-DEV') === 1) {
+        if ($orderBy !== null && Version::compare('2.4.0-DEV') === -1) {
             $this->markTestSkipped('EntityRepository::findOneBy(..., $orderBy) only supported in Doctrine >= 2.4.0');
         }
 
