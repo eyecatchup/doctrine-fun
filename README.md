@@ -23,3 +23,15 @@ $config->setDefaultRepositoryClassName('Doctrine\Fun\EntityRepository');
 
 $em = EntityManager::create(..., $config);
 ```
+
+### Decorating EntityManager so that EntityManager::createQuery() returns a Query object that has a getOptionResult() method
+```php
+<?php
+
+$em = new Doctrine\Fun\EntityManagerDecorator(EntityManager::create(..., $config));
+
+// $query is an instance of Doctrine\Fun\Query
+$query = $em->create('SELECT MyEntity e FROM MyEntity');
+
+$entity = $query->getOrElse(new MyEntity());
+```
